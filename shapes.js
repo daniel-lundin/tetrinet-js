@@ -10,10 +10,11 @@ function box() {
 
 function pyramid() {
     return [
-        [0, 0, 0, 0],
-        [0, 1, 0, 0],
-        [1, 1, 1, 0],
-        [0, 0, 0, 0],
+        [0, 0, 0, 0, 0],
+        [0, 0, 1, 0, 0],
+        [0, 1, 1, 1, 0],
+        [0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0],
     ]
 }
 
@@ -37,23 +38,30 @@ function L() {
 
 function zed() {
     return [
-        [0, 0, 0, 0],
-        [0, 1, 1, 0],
-        [1, 1, 0, 0],
-        [0, 0, 0, 0]
+        [0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0],
+        [0, 0, 1, 1, 0],
+        [0, 1, 1, 0, 0],
+        [0, 0, 0, 0, 0]
     ]
 }
 
 factories = [box, pyramid, I, L, zed];
 
 function rotate(shape) {
-    var new_shape = [
-        [0, 0, 0, 0],
-        [0, 0, 0, 0],
-        [0, 0, 0, 0],
-        [0, 0, 0, 0]
-    ];
 
+    var new_shape = Array(shape.length);
+    for(var i=0;i<shape.length; ++i) {
+        new_shape[i] = Array(shape.length);
+    }
+
+    for(var i=0;i<shape.length; ++i) {
+        for(var j=0;j<shape[i].length; ++j) {
+            new_shape[i][j] = shape[shape.length-j-1][i];
+        }
+    }
+    // A 4x4 rotation does this:
+    /*
     new_shape[0][0] = shape[3][0];
     new_shape[0][1] = shape[2][0];
     new_shape[0][2] = shape[1][0];
@@ -73,6 +81,7 @@ function rotate(shape) {
     new_shape[3][1] = shape[2][3];
     new_shape[3][2] = shape[1][3];
     new_shape[3][3] = shape[0][3];
+    */
 
     return new_shape;
 }
