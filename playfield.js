@@ -10,7 +10,7 @@ var CELL_COLORS = {
 
 var Cell = function(color) {
     this.color = color;
-} 
+}
 
 var PlayField = function(width, height) {
     this.width = width;
@@ -26,7 +26,66 @@ var PlayField = function(width, height) {
     }
 }
 
-PlayField.prototype.shape_at = function(x, y) {
+PlayField.prototype.dump = function() {
+    var xoffset = this.shape_pos_x;
+    var yoffset = this.shape_pos_y;
+    for(var y=0;y<this.height;++y) {
+        var s = "";
+        for(var x=0;x<this.width;++x) {
+            var cell = this.cells[x][y];
+            if(cell) {
+                s += cell.color;
+            } else if(this._shape_at(x, y)) {
+                s += 'x';
+            } else {
+                s += "_";
+            }
+        }
+        console.log(s);
+    }
+}
+
+PlayField.prototype.step = function() {
+    if(this.shape.length == 0) {
+        var idx = Math.floor(Math.random()*shapes.factories.length);
+        var shape = shapes.factories[idx]();
+        this.shape = shape;
+        this.shape_pos_x = 3;
+        this.shape_pos_y = 0;
+        return 0;
+    }
+
+    // Check if step is possible
+    if(this._step_possible()) {
+        this.shape_pos_y += 1;
+        return 0;
+    } else {
+        this._freeze_shape();
+        return this._reduce_lines();
+    }
+}
+
+PlayField.prototype.move_shape_left = function() {
+    if(this._legal_shape_position(this.shape_pos_x-1, this.shape_pos_y, this.shape)) {
+        this.shape_pos_x -= 1;
+    }
+}
+
+PlayField.prototype.move_shape_right = function() {
+    if(this._legal_shape_position(this.shape_pos_x+1, this.shape_pos_y, this.shape)) {
+        this.shape_pos_x += 1;
+    }
+}
+
+PlayField.prototype.rotate_shape = function() {
+    if(this._legal_shape_position(this.shape_pos_x, this.shape_pos_y, shapes.rotate(this.shape))) {
+        this.shape = shapes.rotate(this.shape);
+    }
+}
+
+/** PRIVATE **/
+
+PlayField.prototype._shape_at = function(x, y) {
     for(var i=0;i<this.shape.length;++i) {
         for(var j=0;j<this.shape[i].length;++j) {
             if(this.shape[i][j] == 1) {
@@ -40,26 +99,7 @@ PlayField.prototype.shape_at = function(x, y) {
     return false;
 }
 
-PlayField.prototype.dump = function() {
-    var xoffset = this.shape_pos_x;
-    var yoffset = this.shape_pos_y;
-    for(var y=0;y<this.height;++y) {
-        var s = "";
-        for(var x=0;x<this.width;++x) {
-            var cell = this.cells[x][y];
-            if(cell) {
-                s += cell.color;
-            } else if(this.shape_at(x, y)) {
-                s += 'x';
-            } else {
-                s += "_";
-            }
-        }
-        console.log(s);
-    }
-}
-
-PlayField.prototype.step_possible = function() {
+PlayField.prototype._step_possible = function() {
     var xoffset = this.shape_pos_x;
     var yoffset = this.shape_pos_y+1;
     for(var i=0;i<this.shape.length;++i) {
@@ -77,7 +117,8 @@ PlayField.prototype.step_possible = function() {
     return true;
 }
 
-PlayField.prototype.freeze_shape = function() {
+
+PlayField.prototype._freeze_shape = function() {
     var xoffset = this.shape_pos_x;
     var yoffset = this.shape_pos_y;
     for(var i=0;i<this.shape.length;++i) {
@@ -90,15 +131,7 @@ PlayField.prototype.freeze_shape = function() {
     this.shape = [];
 }
 
-PlayField.prototype.move_cells_down = function(end_y) {
-    for(var y=end_y-1;y>=0;--y) {
-        for(var x=0;x<this.width;++x) {
-            this.cells[x][y+1] = this.cells[x][y];
-        }
-    }
-}
-
-PlayField.prototype.reduce_lines = function() {
+PlayField.prototype._reduce_lines = function() {
     var lines_reduced = 0;
     for(var y=0;y<this.height;++y) {
         var whole_line = true;
@@ -113,30 +146,37 @@ PlayField.prototype.reduce_lines = function() {
                 this.cells[x][y] = 0;
             }
             ++lines_reduced;
-            this.move_cells_down(y);
+            this._move_cells_down(y);
         }
     }
     return lines_reduced;
 }
 
-PlayField.prototype.step = function() {
-    if(this.shape.length == 0) {
-        var idx = Math.floor(Math.random()*shapes.factories.length);
-        var shape = shapes.factories[idx]();
-        this.shape = shape;
-        this.shape_pos_x = 3;
-        this.shape_pos_y = 0;
-        return 0;
+PlayField.prototype._move_cells_down = function(end_y) {
+    for(var y=end_y-1;y>=0;--y) {
+        for(var x=0;x<this.width;++x) {
+            this.cells[x][y+1] = this.cells[x][y];
+        }
     }
+}
 
-    // Check if step is possible
-    if(this.step_possible()) {
-        this.shape_pos_y += 1;
-        return 0;
-    } else {
-        this.freeze_shape();
-        return this.reduce_lines();
+PlayField.prototype._legal_shape_position = function(xoffset, yoffset, shape) {
+    for(var x=0;x<shape.length;++x) {
+        for(var y=0;y<shape[x].length;++y) {
+            if(shape[x][y] == 1) {
+                var realx = x + xoffset;
+                var realy = y + yoffset;
+                // Check borders
+                if(realx < 0 || realx >= this.width)
+                    return false;
+                if(realy < 0 || realy >= this.height)
+                    return false;
+                if(this.cells[realx][realy])
+                    return false;
+            }
+        }
     }
+    return true;
 }
 
 exports.PlayField = PlayField;

@@ -18,13 +18,13 @@ var playfield = new p.PlayField(10, 10);
 var actions = {
     's': function() { playfield.step(); },
     'h': function() {
-        playfield.shape_pos_x -= 1;
+        playfield.move_shape_left();
     },
     'l': function() {
-        playfield.shape_pos_x += 1;
+        playfield.move_shape_right();
     },
     'r': function() {
-        playfield.shape = s.rotate(playfield.shape);
+        playfield.rotate_shape();
     },
     'x': function() {
         console.log(playfield.shape);
