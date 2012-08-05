@@ -17,7 +17,7 @@ var PlayField = function(width, height) {
     this.height = height;
     this.cells = [];
 
-    this.shape = undefined;
+    this.shape = [];
     this.shape_pos_x = 0;
     this.shape_pos_y = 0;
     // Initialize the ceels
@@ -26,12 +26,12 @@ var PlayField = function(width, height) {
     }
 }
 
-function shape_at(play_field, x, y) {
-    for(var i=0;i<4;++i) {
-        for(var j=0;j<4;++j) {
-            if(play_field.shape[i][j] == 1) {
-                if(i+play_field.shape_pos_x == x &&
-                   j+play_field.shape_pos_y == y) {
+PlayField.prototype.shape_at = function(x, y) {
+    for(var i=0;i<this.shape.length;++i) {
+        for(var j=0;j<this.shape[i].length;++j) {
+            if(this.shape[i][j] == 1) {
+                if(i+this.shape_pos_x == x &&
+                   j+this.shape_pos_y == y) {
                     return true;
                 }
             }
@@ -40,16 +40,16 @@ function shape_at(play_field, x, y) {
     return false;
 }
 
-function dump(play_field) {
-    var xoffset = play_field.shape_pos_x;
-    var yoffset = play_field.shape_pos_y;
-    for(var y=0;y<play_field.height;++y) {
+PlayField.prototype.dump = function() {
+    var xoffset = this.shape_pos_x;
+    var yoffset = this.shape_pos_y;
+    for(var y=0;y<this.height;++y) {
         var s = "";
-        for(var x=0;x<play_field.width;++x) {
-            var cell = play_field.cells[x][y];
+        for(var x=0;x<this.width;++x) {
+            var cell = this.cells[x][y];
             if(cell) {
                 s += cell.color;
-            } else if(play_field.shape && shape_at(play_field, x, y)) {
+            } else if(this.shape_at(x, y)) {
                 s += 'x';
             } else {
                 s += "_";
@@ -59,22 +59,16 @@ function dump(play_field) {
     }
 }
 
-function move_cell(play_field, from_pos, to_pos) {
-    var cell = play_field.cells[from_pos[0]][from_pos[1]];
-    play_field.cells[to_pos[0]][to_pos[1]] = cell;
-    play_field.cells[from_pos[0]][from_pos[1]] = undefined;
-}
-
-function step_possible(play_field) {
-    var xoffset = play_field.shape_pos_x;
-    var yoffset = play_field.shape_pos_y+1;
-    for(var i=0;i<4;++i) {
-        for(var j=0;j<4;++j) {
-            if(play_field.shape[i][j] == 1) {
-                if(play_field.cells[i+xoffset][j+yoffset]) {
+PlayField.prototype.step_possible = function() {
+    var xoffset = this.shape_pos_x;
+    var yoffset = this.shape_pos_y+1;
+    for(var i=0;i<this.shape.length;++i) {
+        for(var j=0;j<this.shape[i].length;++j) {
+            if(this.shape[i][j] == 1) {
+                if(this.cells[i+xoffset][j+yoffset]) {
                     return false;
                 }
-                if(j+yoffset >= play_field.height) {
+                if(j+yoffset >= this.height) {
                     return false;
                 }
             }
@@ -83,50 +77,67 @@ function step_possible(play_field) {
     return true;
 }
 
-function freeze_shape(play_field) {
-    var xoffset = play_field.shape_pos_x;
-    var yoffset = play_field.shape_pos_y;
-    for(var i=0;i<4;++i) {
-        for(var j=0;j<4;++j) {
-            if(play_field.shape[i][j] == 1) {
-                play_field.cells[i+xoffset][j+yoffset] = new Cell(CELL_COLORS.BLUE);
+PlayField.prototype.freeze_shape = function() {
+    var xoffset = this.shape_pos_x;
+    var yoffset = this.shape_pos_y;
+    for(var i=0;i<this.shape.length;++i) {
+        for(var j=0;j<this.shape[i].length;++j) {
+            if(this.shape[i][j] == 1) {
+                this.cells[i+xoffset][j+yoffset] = new Cell(CELL_COLORS.BLUE);
             }
         }
     }
-    play_field.shape = undefined;
+    this.shape = [];
 }
 
-function step(play_field) {
-    if(play_field.shape == undefined) {
-        console.log("generating shape");
+PlayField.prototype.move_cells_down = function(end_y) {
+    for(var y=end_y-1;y>=0;--y) {
+        for(var x=0;x<this.width;++x) {
+            this.cells[x][y+1] = this.cells[x][y];
+        }
+    }
+}
+
+PlayField.prototype.reduce_lines = function() {
+    var lines_reduced = 0;
+    for(var y=0;y<this.height;++y) {
+        var whole_line = true;
+        for(var x=0;x<this.width;++x) {
+            if(!this.cells[x][y]) {
+                whole_line = false;
+                break;
+            }
+        }
+        if(whole_line) {
+            for(var x=0;x<this.width;++x) {
+                this.cells[x][y] = 0;
+            }
+            ++lines_reduced;
+            this.move_cells_down(y);
+        }
+    }
+    return lines_reduced;
+}
+
+PlayField.prototype.step = function() {
+    if(this.shape.length == 0) {
         var idx = Math.floor(Math.random()*shapes.factories.length);
         var shape = shapes.factories[idx]();
-        console.log(shapes.factories[idx]);
-        play_field.shape = shape;
-        play_field.shape_pos_x = 3;
-        play_field.shape_pos_y = 0;
-        return;
+        this.shape = shape;
+        this.shape_pos_x = 3;
+        this.shape_pos_y = 0;
+        return 0;
     }
 
     // Check if step is possible
-    if(step_possible(play_field)) {
-        play_field.shape_pos_y += 1;
+    if(this.step_possible()) {
+        this.shape_pos_y += 1;
+        return 0;
     } else {
-        console.log("freezing shape");
-        freeze_shape(play_field);
+        this.freeze_shape();
+        return this.reduce_lines();
     }
 }
 
-function add_falling_box(play_field) {
-    play_field.falling_shape_cells.push(new Cell(CELL_COLORS.BLUE));
-}
-
-var play_field = new PlayField(10, 10);
-for(var i=0;i<14;++i) {
-    step(play_field);
-}
-dump(play_field);
-console.log("rotating");
-play_field.shape = shapes.rotate(play_field.shape);
-dump(play_field);
+exports.PlayField = PlayField;
 

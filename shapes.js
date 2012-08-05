@@ -11,23 +11,28 @@ function box() {
 function pyramid() {
     return [
         [0, 0, 0, 0],
-        [0, 0, 0, 0],
         [0, 1, 0, 0],
-        [1, 1, 1, 0]
+        [1, 1, 1, 0],
+        [0, 0, 0, 0],
     ]
 }
 
-function l() {
+function I() {
     return [
         [0, 1, 0, 0],
         [0, 1, 0, 0],
         [0, 1, 0, 0],
         [0, 1, 0, 0]
     ]
-/*        [0, 0, 0, 0],
-        [1, 1, 1, 0],
-        [1, 0, 0, 0],
-        [0, 0, 0, 0]*/
+}
+
+function L() {
+    return [
+        [0, 1, 0, 0],
+        [0, 1, 0, 0],
+        [0, 1, 1, 0],
+        [0, 0, 0, 0]
+    ]
 }
 
 function zed() {
@@ -39,7 +44,7 @@ function zed() {
     ]
 }
 
-factories = [box, pyramid, l, zed];
+factories = [box, pyramid, I, L, zed];
 
 function rotate(shape) {
     var new_shape = [
@@ -72,19 +77,12 @@ function rotate(shape) {
     return new_shape;
 }
 
-function rotate_and_print(shape) {
-    console.log(shape);
-    var rot = rotate(shape);
-    rot = rotate(rot);
-    rot = rotate(rot);
-    rot = rotate(rot);
-    console.log(rot);
-}
-
 exports.factories = factories;
 exports.rotate = rotate;
-/*rotate_and_print(l());
-rotate_and_print(box());
-rotate_and_print(pyramid());
-rotate_and_print(zed());
-*/
+exports.rotate = rotate;
+
+exports._box = box;
+exports._pyramid = pyramid;
+exports._I = I;
+exports._L = L;
+exports._zed = zed;
