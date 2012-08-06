@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Tetrinet js</title>
+<script src="/socket.io/socket.io.js"></script>
+<script>
+    function color_idx_as_color(idx) {
+        if(idx == 0)
+            return '#eee';
+        if(idx == 1)
+            return '#4ee';
+        if(idx == 99)
+            return '#e4e';
+    }
+
+    function draw_field(canvas, cells) {
+        var ctx = canvas.getContext('2d');
+        var cell_width = canvas.width / cells.length;
+        var cell_height = canvas.height / cells[0].length;
+
+        for(var x=0;x<cells.length;++x) {
+            for(var y=0;y<cells[x].length;++y) {
+                ctx.fillStyle = color_idx_as_color(cells[x][y]);
+                ctx.fillRect(cell_width*x, cell_height*y, cell_width, cell_height);
+            }
+        }
+    }
+
+    function draw_shape(canvas, shape_coords) {
+        var ctx = canvas.getContext('2d');
+        var cell_height = canvas.height / 20;
+        var cell_width = canvas.width / 10;
+
+        for(var i=0;i<shape_coords.length;++i) {
+            ctx.fillStyle = '#f0f';
+            ctx.fillRect(cell_width*shape_coords[i][0], cell_height*shape_coords[i][1], cell_width, cell_height);
+        }
+    }
+
+    var socket = io.connect('http://localhost:8080');
+
+    socket.on('playfield update', function(data) {
+        var canvas = document.getElementById('canvas');
+        draw_field(canvas, data);
+    });
+
+    document.onkeydown = function(e) {
+        switch(e.keyCode) {
+            case 37:
+                socket.send('h');
+                break;
+            case 39:
+                socket.send('l');
+                break;
+            case 38:
+                socket.send('r');
+                break;
+            case 40:
+                socket.send('s');
+                break;
+        }
+    }
+</script>
+</head>
+
+<body>
+    <canvas id="canvas" width="300" height="500"></canvas>
+</body>
+
+</html>
