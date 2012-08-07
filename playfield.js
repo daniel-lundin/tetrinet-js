@@ -45,13 +45,11 @@ PlayField.prototype.dump = function() {
 }
 
 PlayField.prototype.step = function() {
+    // Return number of lines removed or -1 if game over
     if(this.shape.length == 0) {
         var idx = Math.floor(Math.random()*shapes.factories.length);
         var shape = shapes.factories[idx]();
-        this.shape = shape;
-        this.shape_pos_x = 3;
-        this.shape_pos_y = 0;
-        return 0;
+        return this._place_start_shape(shape);
     }
 
     // Check if step is possible
@@ -157,6 +155,19 @@ PlayField.prototype._move_cells_down = function(end_y) {
             this.cells[x][y+1] = this.cells[x][y];
         }
     }
+}
+
+PlayField.prototype._place_start_shape = function(shape) {
+    // Find uppermost occupied cell
+    var x = Math.floor((this.width - shape.length)/2);
+    for(var i=shape.length;i>0;--i) {
+        if(this._legal_shape_position(x, -i, shape)) {
+            this.shape = shape;
+            this.shape_pos_x = x;
+            this.shape_pos_y = -i;
+        }
+    }
+    return 0;
 }
 
 PlayField.prototype._legal_shape_position = function(xoffset, yoffset, shape) {
