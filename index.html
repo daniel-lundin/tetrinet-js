@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Tetrinet js</title>
+<script src="/socket.io/socket.io.js"></script>
+<script>
+    var color_map = {
+        0: '#eee',
+        1: '#4ee',
+        99: '#e4e'
+    }
+
+    function draw_field(canvas, cells) {
+        var ctx = canvas.getContext('2d');
+        var cell_width = canvas.width / cells.length;
+        var cell_height = canvas.height / cells[0].length;
+
+        for(var x=0;x<cells.length;++x) {
+            for(var y=0;y<cells[x].length;++y) {
+                ctx.fillStyle = color_map[cells[x][y]];
+                ctx.fillRect(cell_width*x, cell_height*y, cell_width, cell_height);
+            }
+        }
+    }
+
+    var socket = io.connect('http://localhost:8080');
+
+    socket.on('playfield update', function(data) {
+        var canvas = document.getElementById('canvas');
+        draw_field(canvas, data);
+    });
+
+    document.onkeydown = function(e) {
+        switch(e.keyCode) {
+            case 37: // left
+                socket.send('left');
+                break;
+            case 39:
+                socket.send('right');
+                break;
+            case 38:
+                socket.send('rotate');
+                break;
+            case 40:
+                socket.send('step');
+                break;
+        }
+    }
+</script>
+</head>
+
+<body>
+    <canvas id="canvas" width="300" height="500"></canvas>
+</body>
+
+</html>
