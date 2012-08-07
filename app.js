@@ -49,41 +49,34 @@ function shape_coords(playfield) {
 
 io.sockets.on('connection', function (socket) {
     // Create a playfield
-    console.log('creating playfield');
     var playfield = new pf.PlayField(10, 20);
     socket.set('playfield', playfield);
     socket.on('message', function (data) {
         switch(data) {
             case 'left':
                 socket.get('playfield', function(err, pf) {
-                    console.log('left');
-                    console.log(pf);
                     pf.move_shape_left();
                     socket.emit('playfield update', serialize_field(pf));
                 });
                 break;
             case 'right':
                 socket.get('playfield', function(err, pf) {
-                    console.log('right');
                     pf.move_shape_right();
                     socket.emit('playfield update', serialize_field(pf));
                 });
                 break;
             case 'step':
                 socket.get('playfield', function(err, pf) {
-                    console.log('stepping');
                     pf.step();
                     socket.emit('playfield update', serialize_field(pf));
                 });
                 break;
             case 'rotate':
                 socket.get('playfield', function(err, pf) {
-                    console.log('rotating');
                     pf.rotate_shape();
                     socket.emit('playfield update', serialize_field(pf));
                 });
                 break;
         }
-        console.log(data);
     });
 });
