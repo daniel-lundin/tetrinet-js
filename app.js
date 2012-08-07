@@ -3,7 +3,7 @@ var io = require('socket.io').listen(app);
 var fs = require('fs');
 var pf = require('./playfield');
 
-app.listen(8080 || process.env.PORT);
+app.listen(process.env.PORT || 8080);
 
 function handler(req, res) {
   fs.readFile(__dirname + '/index.html',
