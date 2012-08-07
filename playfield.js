@@ -8,10 +8,6 @@ var CELL_COLORS = {
     YELLOW: 3,
 };
 
-var Cell = function(color) {
-    this.color = color;
-}
-
 var PlayField = function(width, height) {
     this.width = width;
     this.height = height;
@@ -23,6 +19,9 @@ var PlayField = function(width, height) {
     // Initialize the ceels
     for(var i=0;i<this.width;++i) {
         this.cells.push(Array(this.height));
+        for(var j=0;j<this.height;++j) {
+            this.cells[i][j] = 0;
+        }
     }
 }
 
@@ -34,8 +33,8 @@ PlayField.prototype.dump = function() {
         for(var x=0;x<this.width;++x) {
             var cell = this.cells[x][y];
             if(cell) {
-                s += cell.color;
-            } else if(this._shape_at(x, y)) {
+                s += cell;
+            } else if(this.shape_at(x, y)) {
                 s += 'x';
             } else {
                 s += "_";
@@ -83,9 +82,7 @@ PlayField.prototype.rotate_shape = function() {
     }
 }
 
-/** PRIVATE **/
-
-PlayField.prototype._shape_at = function(x, y) {
+PlayField.prototype.shape_at = function(x, y) {
     for(var i=0;i<this.shape.length;++i) {
         for(var j=0;j<this.shape[i].length;++j) {
             if(this.shape[i][j] == 1) {
@@ -98,6 +95,8 @@ PlayField.prototype._shape_at = function(x, y) {
     }
     return false;
 }
+
+/** PRIVATE **/
 
 PlayField.prototype._step_possible = function() {
     var xoffset = this.shape_pos_x;
@@ -124,7 +123,7 @@ PlayField.prototype._freeze_shape = function() {
     for(var i=0;i<this.shape.length;++i) {
         for(var j=0;j<this.shape[i].length;++j) {
             if(this.shape[i][j] == 1) {
-                this.cells[i+xoffset][j+yoffset] = new Cell(CELL_COLORS.BLUE);
+                this.cells[i+xoffset][j+yoffset] = 1;
             }
         }
     }
