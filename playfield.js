@@ -11,36 +11,34 @@ var CELL_COLORS = {
 var PlayField = function(width, height) {
     this.width = width;
     this.height = height;
-    this.cells = [];
+    this.cells = Array(width * height);
+    for(var i=0;i<this.cells.length;++i)
+        this.cells[i] = 0;
+
 
     this.shape = [];
     this.shape_pos_x = 0;
     this.shape_pos_y = 0;
-    // Initialize the ceels
-    for(var i=0;i<this.width;++i) {
-        this.cells.push(Array(this.height));
-        for(var j=0;j<this.height;++j) {
-            this.cells[i][j] = 0;
-        }
-    }
 }
 
 PlayField.prototype.dump = function() {
     var xoffset = this.shape_pos_x;
     var yoffset = this.shape_pos_y;
-    for(var y=0;y<this.height;++y) {
-        var s = "";
-        for(var x=0;x<this.width;++x) {
-            var cell = this.cells[x][y];
-            if(cell) {
-                s += cell;
-            } else if(this.shape_at(x, y)) {
-                s += 'x';
-            } else {
-                s += "_";
-            }
+    var s = "";
+    for(var i=0;i<this.cells.length;++i) {
+        var x = i % this.width;
+        var y = Math.floor(i / this.width);
+        if(this.cells[i]) {
+            s += this.cells[i];
+        } else if(this.shape_at(x, y)) {
+            s += 'x';
+        } else {
+            s += '_';
         }
-        console.log(s);
+        if((i != 0) && !((i+1) % this.width)) {
+            console.log(s);
+            var s = "";
+        }
     }
 }
 
@@ -102,7 +100,8 @@ PlayField.prototype._step_possible = function() {
     for(var i=0;i<this.shape.length;++i) {
         for(var j=0;j<this.shape[i].length;++j) {
             if(this.shape[i][j] == 1) {
-                if(this.cells[i+xoffset][j+yoffset]) {
+                var cellidx = (i + xoffset) + this.width*(j+yoffset);
+                if(this.cells[cellidx]) {
                     return false;
                 }
                 if(j+yoffset >= this.height) {
@@ -121,7 +120,8 @@ PlayField.prototype._freeze_shape = function() {
     for(var i=0;i<this.shape.length;++i) {
         for(var j=0;j<this.shape[i].length;++j) {
             if(this.shape[i][j] == 1) {
-                this.cells[i+xoffset][j+yoffset] = 1;
+                var cellidx = (i + xoffset) + this.width*(j+yoffset);
+                this.cells[cellidx] = 1;
             }
         }
     }
@@ -130,29 +130,33 @@ PlayField.prototype._freeze_shape = function() {
 
 PlayField.prototype._reduce_lines = function() {
     var lines_reduced = 0;
-    for(var y=0;y<this.height;++y) {
+    var i=0;
+    for(var i=0;i<this.cells.length;i+=this.width) {
         var whole_line = true;
         for(var x=0;x<this.width;++x) {
-            if(!this.cells[x][y]) {
+            if(!this.cells[i+x]) {
                 whole_line = false;
                 break;
             }
         }
         if(whole_line) {
+            // Zero out row
             for(var x=0;x<this.width;++x) {
-                this.cells[x][y] = 0;
+                this.cells[i+x] = 0;
             }
             ++lines_reduced;
-            this._move_cells_down(y);
+            this._move_cells_down(i);
         }
     }
     return lines_reduced;
 }
 
-PlayField.prototype._move_cells_down = function(end_y) {
-    for(var y=end_y-1;y>=0;--y) {
+PlayField.prototype._move_cells_down = function(end) {
+    for(var i=end-this.width;i>=0;i-=this.width) {
         for(var x=0;x<this.width;++x) {
-            this.cells[x][y+1] = this.cells[x][y];
+            var cellidx = i + x;
+            var next_row_idx = cellidx + this.width;
+            this.cells[next_row_idx] = this.cells[cellidx];
         }
     }
 }
@@ -181,7 +185,8 @@ PlayField.prototype._legal_shape_position = function(xoffset, yoffset, shape) {
                     return false;
                 if(realy < 0 || realy >= this.height)
                     return false;
-                if(this.cells[realx][realy])
+                var cellidx = realy*this.width + realx;
+                if(this.cells[cellidx])
                     return false;
             }
         }

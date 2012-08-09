@@ -21,18 +21,21 @@ function handler(req, res) {
 function serialize_field(playfield) {
     var cells = Array(playfield.cells.length);
     for(var i=0;i<cells.length;++i) {
-        cells[i] = [];
-        for(var j=0;j<playfield.cells[i].length;++j) {
-            var cell = 0;
-            if(playfield.cells[i][j]) {
-                cell = playfield.cells[i][j];
-            } else if(playfield.shape_at(i, j)) {
-                cell = 99;
-            }
-            cells[i].push(cell);
+        var cell = 0;
+        var x = i % playfield.width;
+        var y = Math.floor(i / playfield.width);
+        if(playfield.cells[i]) {
+            cell = playfield.cells[i];
+        } else if(playfield.shape_at(x, y)) {
+            cell = 99;
         }
+        cells[i] = cell;
     }
-    return cells;
+    return {
+        "cells": cells,
+        "width": playfield.width,
+        "height": playfield.height
+    };
 }
 
 function shape_coords(playfield) {
