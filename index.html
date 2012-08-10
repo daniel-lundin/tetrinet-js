@@ -30,6 +30,7 @@
     var socket = io.connect('/');
 
     socket.on('playfield update', function(data) {
+        console.log('update received');
         var canvas = document.getElementById('canvas');
         draw_field(canvas, data);
     });
@@ -44,9 +45,6 @@
                 break;
             case 38:
                 socket.send('rotate');
-                break;
-            case 40:
-                socket.send('step');
                 break;
         }
     }
