@@ -10,7 +10,6 @@
     var player_id;
 
     socket.on('playfield_update', function(data) {
-      console.log('update received');
       var canvas = document.getElementById('canvas');
       draw_fields(canvas, data);
     });
@@ -34,11 +33,17 @@
         case 40:
           socket.send('down');
           break;
+        case 32:
+          socket.send('free_fall');
+          break;
+        default:
+          console.log(e.keyCode)
+          break;
       }
     }
     </script>
   </head>
   <body>
-    <canvas id="canvas" width="600" height="500"></canvas>
+    <canvas id="canvas" width="300" height="500"></canvas>
   </body>
 </html>

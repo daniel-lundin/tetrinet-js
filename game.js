@@ -31,11 +31,8 @@ function serialize_fields(game) {
 }
 
 function tick(game) {
-    console.log("ticking");
     for(var i=0;i<game.sockets.length;++i) {
-        var pf = game.playfields[i];
-        pf.step();
-        game.sockets[i].emit('playfield_update', serialize_fields(game))
+        game.step(i);
     }
 }
 
@@ -44,6 +41,16 @@ function Game() {
     this.playfields = [];
     this.started = false;
     this.player_count = 0;
+}
+
+Game.prototype.step = function(player_idx) {
+    var pf = this.playfields[player_idx];
+    var lines_reduced = pf.step();
+    if(lines_reduced > 1) {
+        //TODO: Increase lines of others
+        console.log("Increasing others");
+    }
+    this.sockets[player_idx].emit('playfield_update', serialize_fields(this))
 }
 
 Game.prototype.add_player = function(socket) {
@@ -100,6 +107,15 @@ Game.prototype.move_down = function(socket) {
         var pf = g.playfields[idx];
         pf.move_shape_down();
         socket.emit('playfield_update', serialize_fields(g));
+    });
+}
+
+Game.prototype.free_fall = function(socket) {
+    var g = this;
+    socket.get('idx', function(err, idx) {
+        var pf = g.playfields[idx];
+        pf.free_fall();
+        g.step(idx);
     });
 }
 

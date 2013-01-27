@@ -57,7 +57,8 @@ PlayField.prototype.step = function() {
         return 0;
     } else {
         this._freeze_shape();
-        return this._reduce_lines();
+        var reduced = this._reduce_lines();
+        return reduced
     }
 }
 
@@ -77,6 +78,14 @@ PlayField.prototype.move_shape_down = function() {
     if(this._legal_shape_position(this.shape_pos_x, this.shape_pos_y+1, this.shape)) {
         this.shape_pos_y += 1;
     }
+}
+
+PlayField.prototype.free_fall = function() {
+    var y = this.shape_pos_y + 1;
+    while(this._legal_shape_position(this.shape_pos_x, y, this.shape)) {
+        y += 1;
+    }
+    this.shape_pos_y = y - 1;
 }
 
 PlayField.prototype.rotate_shape = function() {
