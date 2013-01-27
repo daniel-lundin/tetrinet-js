@@ -8,17 +8,33 @@ io.set('log level', 1)
 
 app.listen(process.env.PORT || 8080);
 
-function handler(req, res) {
-  fs.readFile(__dirname + '/index.html',
-  function (err, data) {
-    if (err) {
-      res.writeHead(500);
-      return res.end('Error loading index.html');
-    }
+static_url_map = {
+    '/': ['index.html','text/html'],
+    '/static/js/drawing.js': ['/static/js/drawing.js', 'application/javascript']
+}
 
-    res.writeHead(200);
-    res.end(data);
-  });
+function serve_static(res, url) {
+    if(url in static_url_map) {
+        var match = static_url_map[url];
+        path = match[0];
+        content_type = match[1];
+        fs.readFile(__dirname + "/" + path,
+            function (err, data) {
+                if(err) {
+                    res.writeHead(500);
+                    console.log(err);
+                    return res.end("Error loading static file" + path);
+                }
+                //res.writeHead(200, {'Content-Type': content_type});
+                res.writeHead(200);
+                res.end(data);
+            }
+        );
+    }
+}
+
+function handler(req, res) {
+    serve_static(res, req.url);
 }
 
 
@@ -43,7 +59,7 @@ io.sockets.on('connection', function (socket) {
         }
     });
 
-    socket.on('disconnect', function (socket) {
+    socket.on('disconnect', function (data) {
         console.log('disconnect');
         game.remove_player(socket);
     });

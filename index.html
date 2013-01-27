@@ -1,58 +1,38 @@
 <!DOCTYPE html>
 <html>
-<head>
-<title>Tetrinet js</title>
-<script src="/socket.io/socket.io.js"></script>
-<script>
-    var color_map = {
-        0: '#eee',
-        1: '#4ee',
-        99: '#e4e'
-    }
-
-    function draw_field(canvas, pf_data) {
-        var ctx = canvas.getContext('2d');
-        console.log(pf_data);
-        var cells = pf_data.cells;
-        var height = pf_data.height;
-        var width = pf_data.width;
-        var cell_width = canvas.width / width;
-        var cell_height = canvas.height / height;
-
-        for(var i=0;i<cells.length;++i) {
-            var x = i % width;
-            var y = Math.floor(i/width);
-            ctx.fillStyle = color_map[cells[i]];
-            ctx.fillRect(cell_width*x, cell_height*y, cell_width, cell_height);
-        }
-    }
+  <head>
+    <title>Tetrinet js</title>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/static/js/drawing.js"></script>
+    <script>
 
     var socket = io.connect('/');
 
     socket.on('playfield update', function(data) {
-        console.log('update received');
-        var canvas = document.getElementById('canvas');
-        draw_field(canvas, data);
+      console.log('update received');
+      var canvas = document.getElementById('canvas');
+      draw_field(canvas, data);
     });
 
     document.onkeydown = function(e) {
-        switch(e.keyCode) {
-            case 37: // left
-                socket.send('left');
-                break;
-            case 39:
-                socket.send('right');
-                break;
-            case 38:
-                socket.send('rotate');
-                break;
-        }
+      switch(e.keyCode) {
+        case 37: // left
+          socket.send('left');
+          break;
+        case 39:
+          socket.send('right');
+          break;
+        case 38:
+          socket.send('rotate');
+          break;
+        case 40:
+          socket.send('down');
+          break;
+      }
     }
-</script>
-</head>
-
-<body>
+    </script>
+  </head>
+  <body>
     <canvas id="canvas" width="300" height="500"></canvas>
-</body>
-
+  </body>
 </html>
