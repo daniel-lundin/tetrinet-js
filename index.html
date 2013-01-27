@@ -2,6 +2,7 @@
 <html>
   <head>
     <title>Tetrinet js</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <script src="/socket.io/socket.io.js"></script>
     <script src="/static/js/drawing.js"></script>
     <script>
@@ -43,6 +44,23 @@
           console.log(e.keyCode)
           break;
       }
+    }
+
+    // Touch specifics
+    document.ontouchend = function(e) {
+      var t = e.changedTouches[0];
+      if(t.pageX < 100) {
+        socket.send('left');
+      } else if(t.pageX > document.width - 100) {
+        socket.send('right');
+      } else if(t.pageY < 100) {
+        socket.send('rotate');
+      } else if(t.pageY > document.height - 100) {
+        socket.send('free_fall');
+      }
+    }
+    document.ontouchmove = function(e) {
+      e.preventDefault();
     }
     </script>
   </head>

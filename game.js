@@ -31,8 +31,16 @@ function serialize_fields(game) {
 }
 
 function tick(game) {
+    var num_alive = 0;
     for(var i=0;i<game.sockets.length;++i) {
+        if(game.playfields[i].alive) {
+            ++num_alive;
+        }
         game.step(i);
+    }
+    if(num_alive == 1) {
+        console.log('---game over---');
+        clearInterval(game.clock);
     }
 }
 
@@ -47,7 +55,6 @@ Game.prototype.step = function(player_idx) {
     var pf = this.playfields[player_idx];
     var lines_reduced = pf.step();
     if(lines_reduced > 1) {
-        //TODO: Increase lines of others
         for(var idx in this.sockets) {
             if(idx != player_idx) {
                 this.playfields[idx].increase_from_bottom(lines_reduced-1);

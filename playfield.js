@@ -1,13 +1,6 @@
 
 var shapes = require("./shapes.js");
 
-var CELL_COLORS = {
-    BLUE: 0,
-    RED: 1,
-    GREEN: 2,
-    YELLOW: 3,
-};
-
 var PlayField = function(width, height) {
     this.width = width;
     this.height = height;
@@ -19,6 +12,7 @@ var PlayField = function(width, height) {
     this.shape = [];
     this.shape_pos_x = 0;
     this.shape_pos_y = 0;
+    this.alive = true;
 }
 
 PlayField.prototype.dump = function() {
@@ -48,7 +42,11 @@ PlayField.prototype.step = function() {
         var idx = Math.floor(Math.random()*shapes.factories.length);
         var shape = shapes.factories[idx]();
         shapes.randomize_color(shape);
-        return this._place_start_shape(shape);
+        var res = this._place_start_shape(shape);
+        if(res == -1) {
+            this.alive = false;
+        }
+        return res;
     }
 
     // Check if step is possible
