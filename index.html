@@ -7,11 +7,17 @@
     <script>
 
     var socket = io.connect('/');
+    var player_id;
 
-    socket.on('playfield update', function(data) {
+    socket.on('playfield_update', function(data) {
       console.log('update received');
       var canvas = document.getElementById('canvas');
-      draw_field(canvas, data);
+      draw_fields(canvas, data);
+    });
+
+    socket.on('id_assigned', function(data) {
+      console.log("I'm player " + data);
+      player_id = data;
     });
 
     document.onkeydown = function(e) {
@@ -33,6 +39,6 @@
     </script>
   </head>
   <body>
-    <canvas id="canvas" width="300" height="500"></canvas>
+    <canvas id="canvas" width="600" height="500"></canvas>
   </body>
 </html>

@@ -25,8 +25,7 @@ function serve_static(res, url) {
                     console.log(err);
                     return res.end("Error loading static file" + path);
                 }
-                //res.writeHead(200, {'Content-Type': content_type});
-                res.writeHead(200);
+                res.writeHead(200, {'Content-Type': content_type});
                 res.end(data);
             }
         );
