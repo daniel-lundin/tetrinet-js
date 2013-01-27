@@ -24,7 +24,6 @@ function serialize_field(playfield) {
 
 function tick(game) {
     console.log("ticking");
-    console.log(game.sockets);
     for(var i=0;i<game.sockets.length;++i) {
         var pf = game.playfields[i];
         pf.step();
@@ -46,11 +45,22 @@ Game.prototype.add_player = function(socket) {
     ++this.player_count;
     console.log('player added');
     if(this.full()) {
-        console.log("Game started");
+        console.log("game started");
         this.started = true;
         var g = this;
+        console.log("starting timer");
         this.clock = setInterval(function() { tick(g); }, 1000);
     }
+}
+
+Game.prototype.remove_player = function(socket) {
+    var g = this;
+    socket.get('idx', function(err, idx) {
+        g.sockets.splice(idx, idx);
+        g.playfields.splice(idx, idx);
+        --g.player_count;
+        console.log('player removed');
+    });
 }
 
 Game.prototype.full = function() {
@@ -71,6 +81,15 @@ Game.prototype.move_right = function(socket) {
     socket.get('idx', function(err, idx) {
         var pf = g.playfields[idx];
         pf.move_shape_right();
+        socket.emit('playfield update', serialize_field(pf));
+    });
+}
+
+Game.prototype.move_down = function(socket) {
+    var g = this;
+    socket.get('idx', function(err, idx) {
+        var pf = g.playfields[idx];
+        pf.move_shape_down();
         socket.emit('playfield update', serialize_field(pf));
     });
 }

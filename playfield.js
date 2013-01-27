@@ -72,6 +72,12 @@ PlayField.prototype.move_shape_right = function() {
     }
 }
 
+PlayField.prototype.move_shape_down = function() {
+    if(this._legal_shape_position(this.shape_pos_x, this.shape_pos_y+1, this.shape)) {
+        this.shape_pos_y += 1;
+    }
+}
+
 PlayField.prototype.rotate_shape = function() {
     if(this._legal_shape_position(this.shape_pos_x, this.shape_pos_y, shapes.rotate(this.shape))) {
         this.shape = shapes.rotate(this.shape);
