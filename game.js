@@ -1,6 +1,6 @@
 var playfield = require('./playfield.js');
 
-PLAYER_COUNT=2;
+PLAYER_COUNT=1;
 
 function serialize_field(playfield) {
     var cells = Array(playfield.cells.length);
@@ -11,7 +11,7 @@ function serialize_field(playfield) {
         if(playfield.cells[i]) {
             cell = playfield.cells[i];
         } else if(playfield.shape_at(x, y)) {
-            cell = 99;
+            cell = playfield.shape_at(x, y);
         }
         cells[i] = cell;
     }

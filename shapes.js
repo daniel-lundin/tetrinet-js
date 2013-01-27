@@ -86,9 +86,20 @@ function rotate(shape) {
     return new_shape;
 }
 
+function randomize_color(shape) {
+    var color = Math.floor(Math.random()*3)+1;
+    for(var i=0;i<shape.length; ++i) {
+        for(var j=0;j<shape[i].length; ++j) {
+            if(shape[i][j]) {
+                shape[i][j] = color;
+            }
+        }
+    }
+}
+
 exports.factories = factories;
 exports.rotate = rotate;
-exports.rotate = rotate;
+exports.randomize_color = randomize_color;
 
 exports._box = box;
 exports._pyramid = pyramid;

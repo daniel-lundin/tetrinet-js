@@ -47,6 +47,7 @@ PlayField.prototype.step = function() {
     if(this.shape.length == 0) {
         var idx = Math.floor(Math.random()*shapes.factories.length);
         var shape = shapes.factories[idx]();
+        shapes.randomize_color(shape);
         return this._place_start_shape(shape);
     }
 
@@ -87,10 +88,10 @@ PlayField.prototype.rotate_shape = function() {
 PlayField.prototype.shape_at = function(x, y) {
     for(var i=0;i<this.shape.length;++i) {
         for(var j=0;j<this.shape[i].length;++j) {
-            if(this.shape[i][j] == 1) {
+            if(this.shape[i][j]) {
                 if(i+this.shape_pos_x == x &&
                    j+this.shape_pos_y == y) {
-                    return true;
+                    return this.shape[i][j];
                 }
             }
         }
@@ -105,7 +106,7 @@ PlayField.prototype._step_possible = function() {
     var yoffset = this.shape_pos_y+1;
     for(var i=0;i<this.shape.length;++i) {
         for(var j=0;j<this.shape[i].length;++j) {
-            if(this.shape[i][j] == 1) {
+            if(this.shape[i][j]) {
                 var cellidx = (i + xoffset) + this.width*(j+yoffset);
                 if(this.cells[cellidx]) {
                     return false;
@@ -125,9 +126,9 @@ PlayField.prototype._freeze_shape = function() {
     var yoffset = this.shape_pos_y;
     for(var i=0;i<this.shape.length;++i) {
         for(var j=0;j<this.shape[i].length;++j) {
-            if(this.shape[i][j] == 1) {
+            if(this.shape[i][j]) {
                 var cellidx = (i + xoffset) + this.width*(j+yoffset);
-                this.cells[cellidx] = 1;
+                this.cells[cellidx] = 99;
             }
         }
     }
@@ -183,7 +184,7 @@ PlayField.prototype._place_start_shape = function(shape) {
 PlayField.prototype._legal_shape_position = function(xoffset, yoffset, shape) {
     for(var x=0;x<shape.length;++x) {
         for(var y=0;y<shape[x].length;++y) {
-            if(shape[x][y] == 1) {
+            if(shape[x][y]) {
                 var realx = x + xoffset;
                 var realy = y + yoffset;
                 // Check borders

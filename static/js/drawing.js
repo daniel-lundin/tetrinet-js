@@ -1,12 +1,21 @@
 var color_map = {
     0: '#eee',
     1: '#4ee',
-    99: '#e4e'
-}
+    2: '#e4e',
+    3: '#ee4',
+    99: '#333'
+};
+
+var border_color_map = {
+    0: '#eee',
+    1: '#4aa',
+    2: '#a4a',
+    3: '#aa4',
+    99: '#333'
+};
 
 function draw_field(canvas, pf_data, field_width, offset) {
     var ctx = canvas.getContext('2d');
-    console.log(pf_data);
     var cells = pf_data.cells;
     var height = pf_data.height;
     var width = pf_data.width;
@@ -16,10 +25,10 @@ function draw_field(canvas, pf_data, field_width, offset) {
     for(var i=0;i<cells.length;++i) {
         var x = i % width;
         var y = Math.floor(i/width);
-        ctx.fillStyle = '#eaf';
+        ctx.fillStyle = border_color_map[cells[i]];
         ctx.fillRect(offset+cell_width*x, cell_height*y, cell_width, cell_height);
         ctx.fillStyle = color_map[cells[i]];
-        ctx.fillRect(offset+cell_width*x+1, cell_height*y+1, cell_width-2, cell_height-2);
+        ctx.fillRect(offset+cell_width*x+2, cell_height*y+2, cell_width-4, cell_height-4);
     }
 }
 
