@@ -58,6 +58,9 @@ io.sockets.on('connection', function (socket) {
             case 'free_fall':
                 game.free_fall(socket);
                 break;
+            case 'inc':
+                game.increase_from_bottom(socket);
+                break;
         }
     });
 

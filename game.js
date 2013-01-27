@@ -1,6 +1,6 @@
 var playfield = require('./playfield.js');
 
-PLAYER_COUNT=1;
+PLAYER_COUNT = 2;
 
 function serialize_field(playfield) {
     var cells = Array(playfield.cells.length);
@@ -48,6 +48,12 @@ Game.prototype.step = function(player_idx) {
     var lines_reduced = pf.step();
     if(lines_reduced > 1) {
         //TODO: Increase lines of others
+        for(var idx in this.sockets) {
+            if(idx != player_idx) {
+                this.playfields[idx].increase_from_bottom(lines_reduced-1);
+                this.sockets[idx].emit('playfield_update', serialize_fields(this));
+            }
+        }
         console.log("Increasing others");
     }
     this.sockets[player_idx].emit('playfield_update', serialize_fields(this))
@@ -124,6 +130,16 @@ Game.prototype.rotate = function(socket) {
     socket.get('idx', function(err, idx) {
         var pf = g.playfields[idx];
         pf.rotate_shape();
+        socket.emit('playfield_update', serialize_fields(g));
+    });
+}
+
+Game.prototype.increase_from_bottom = function(socket) {
+    var g = this;
+    socket.get('idx', function(err, idx) {
+        var pf = g.playfields[idx];
+        console.log('increasing');
+        pf.increase_from_bottom(1);
         socket.emit('playfield_update', serialize_fields(g));
     });
 }

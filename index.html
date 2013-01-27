@@ -36,6 +36,9 @@
         case 32:
           socket.send('free_fall');
           break;
+        case 73:
+          socket.send('inc');
+          break;
         default:
           console.log(e.keyCode)
           break;
@@ -44,6 +47,6 @@
     </script>
   </head>
   <body>
-    <canvas id="canvas" width="300" height="500"></canvas>
+    <canvas id="canvas" width="600" height="500"></canvas>
   </body>
 </html>

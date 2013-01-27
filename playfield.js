@@ -88,6 +88,18 @@ PlayField.prototype.free_fall = function() {
     this.shape_pos_y = y - 1;
 }
 
+PlayField.prototype.increase_from_bottom = function(rows) {
+    while(rows--) {
+        for(var i=0;i<this.height-1;++i) {
+            for(var j=0;j<this.width;++j) {
+                var cell_idx = i*this.width + j;
+                var next_cell_idx = (i+1)*this.width + j;
+                this.cells[cell_idx] = this.cells[next_cell_idx];
+            }
+        }
+    }
+}
+
 PlayField.prototype.rotate_shape = function() {
     if(this._legal_shape_position(this.shape_pos_x, this.shape_pos_y, shapes.rotate(this.shape))) {
         this.shape = shapes.rotate(this.shape);
