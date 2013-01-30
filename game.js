@@ -89,21 +89,21 @@ Game.prototype.move_left = function(socket) {
     var idx = socket.idx;
     var pf = this.playfields[idx];
     pf.move_shape_left();
-    //socket.emit('playfield_update', serialize_fields(this));
+    socket.emit('playfield_update', serialize_fields(this));
 }
 
 Game.prototype.move_right = function(socket) {
     var idx = socket.idx;
     var pf = this.playfields[idx];
     pf.move_shape_right();
-    //socket.emit('playfield_update', serialize_fields(this));
+    socket.emit('playfield_update', serialize_fields(this));
 }
 
 Game.prototype.move_down = function(socket) {
     var idx = socket.idx;
     var pf = this.playfields[idx];
     pf.move_shape_down();
-    //socket.emit('playfield_update', serialize_fields(this));
+    socket.emit('playfield_update', serialize_fields(this));
 }
 
 Game.prototype.free_fall = function(socket) {
@@ -117,7 +117,7 @@ Game.prototype.rotate = function(socket) {
     var idx = socket.idx;
     var pf = this.playfields[idx];
     pf.rotate_shape();
-    //socket.emit('playfield_update', serialize_fields(this));
+    socket.emit('playfield_update', serialize_fields(this));
 }
 
 Game.prototype.emit_player_name_update = function() {
