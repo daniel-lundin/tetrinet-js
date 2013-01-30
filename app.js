@@ -10,7 +10,10 @@ app.listen(process.env.PORT || 8080);
 
 static_url_map = {
     '/': ['index.html','text/html'],
-    '/static/js/drawing.js': ['/static/js/drawing.js', 'application/javascript']
+    '/static/js/drawing.js': ['/static/js/drawing.js', 'application/javascript'],
+    '/static/js/nodemock.js': ['/static/js/nodemock.js', 'application/javascript'],
+    '/static/js/shapes.js': ['/shapes.js', 'application/javascript'],
+    '/static/js/playfield.js': ['/playfield.js', 'application/javascript'],
 }
 
 function serve_static(res, url) {

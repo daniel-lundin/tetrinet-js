@@ -15,6 +15,28 @@ var PlayField = function(width, height) {
     this.alive = true;
 }
 
+PlayField.prototype.serialize = function() {
+    var cells = Array(this.cells.length);
+    return {
+        "cells": this.cells,
+        "width": this.width,
+        "height": this.height,
+        "shape": this.shape,
+        "shape_pos_x": this.shape_pos_x,
+        "shape_pos_y": this.shape_pos_y,
+    };
+}
+
+
+PlayField.load = function(pf_data) {
+    var play_field = new PlayField(pf_data.width, pf_data.height);
+    play_field.cells = pf_data.cells;
+    play_field.shape = pf_data.shape;
+    play_field.shape_pos_x = pf_data.shape_pos_x;
+    play_field.shape_pos_y = pf_data.shape_pos_y;
+    return play_field;
+}
+
 PlayField.prototype.dump = function() {
     var xoffset = this.shape_pos_x;
     var yoffset = this.shape_pos_y;

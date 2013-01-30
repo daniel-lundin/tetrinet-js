@@ -14,29 +14,40 @@ var border_color_map = {
     99: '#333'
 };
 
-function draw_field(canvas, pf_data, field_width, offset) {
+function draw_field(canvas, play_field, field_width, field_height, offset_x, offset_y) {
     var ctx = canvas.getContext('2d');
-    var cells = pf_data.cells;
-    var height = pf_data.height;
-    var width = pf_data.width;
-    var cell_width = field_width / width;
-    var cell_height = canvas.height / height;
 
-    for(var i=0;i<cells.length;++i) {
-        var x = i % width;
-        var y = Math.floor(i/width);
-        ctx.fillStyle = border_color_map[cells[i]];
-        ctx.fillRect(offset+cell_width*x, cell_height*y, cell_width, cell_height);
-        ctx.fillStyle = color_map[cells[i]];
-        ctx.fillRect(offset+cell_width*x+2, cell_height*y+2, cell_width-4, cell_height-4);
+    var cell_width = field_width / play_field.width;
+    var cell_height = field_height / play_field.height;
+
+    for(var x=0;x<play_field.width;++x) {
+        for(var y=0;y<play_field.height;++y) {
+            var idx = x + play_field.width*y;
+            if(play_field.cells[idx]) {
+                ctx.fillStyle = 'green';
+            } else if(play_field.shape_at(x, y)) {
+                ctx.fillStyle = 'blue';
+            } else {
+                ctx.fillStyle = 'grey';
+            }
+            ctx.fillRect(offset_x+cell_width*x, offset_y+cell_height*y, cell_width, cell_height);
+        }
     }
 }
 
+function draw_main_field(canvas, play_field) {
+    draw_field(canvas, play_field, 300, 500, 10, 10);
+}
+
+
 function draw_fields(canvas, pfs_data) {
-    offset = 0;
-    field_width = (canvas.width - 20)/ pfs_data.length;
-    for(var pf_data in pfs_data) {
-        draw_field(canvas, pfs_data[pf_data], field_width, offset);
-        offset += 300;
+    offset_y = 10;
+    draw_main_field(canvas, PlayField.load(pfs_data[PLAYER_ID]));
+
+    for(var key in pfs_data) {
+        if(key == PLAYER_ID)
+            continue;
+        draw_field(canvas, PlayField.load(pfs_data[key]), 50, 100, 320, offset_y);
+        offset_y += 120;
     }
 }

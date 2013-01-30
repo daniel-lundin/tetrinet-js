@@ -4,43 +4,55 @@
     <title>Tetrinet js</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <script src="/socket.io/socket.io.js"></script>
+    <script src="/static/js/nodemock.js"></script>
+    <script src="/static/js/shapes.js"></script>
+    <script src="/static/js/playfield.js"></script>
     <script src="/static/js/drawing.js"></script>
     <script>
 
     var socket = io.connect('/');
-    var player_id;
+    var PLAYER_ID;
+    var PLAY_FIELD;
 
     socket.on('playfield_update', function(data) {
+      console.log('playfield update');
       var canvas = document.getElementById('canvas');
+      PLAY_FIELD = PlayField.load(data[PLAYER_ID]);
       draw_fields(canvas, data);
     });
 
     socket.on('id_assigned', function(data) {
       console.log("I'm player " + data);
-      player_id = data;
+      PLAYER_ID = data;
     });
 
     document.onkeydown = function(e) {
       switch(e.keyCode) {
         case 37: // left
+          PLAY_FIELD.move_shape_left();
           socket.send('left');
           break;
         case 39:
+          PLAY_FIELD.move_shape_right();
           socket.send('right');
           break;
         case 38:
+          PLAY_FIELD.rotate_shape();
           socket.send('rotate');
           break;
         case 40:
+          PLAY_FIELD.move_shape_down();
           socket.send('down');
           break;
         case 32:
+          PLAY_FIELD.free_fall();
           socket.send('free_fall');
           break;
         default:
           console.log(e.keyCode)
-          break;
+          return;
       }
+      draw_main_field(document.getElementById('canvas'), PLAY_FIELD);
     }
 
     // Touch specifics
@@ -62,6 +74,6 @@
     </script>
   </head>
   <body>
-    <canvas id="canvas" width="600" height="500"></canvas>
+    <canvas id="canvas" width="600" height="600"></canvas>
   </body>
 </html>

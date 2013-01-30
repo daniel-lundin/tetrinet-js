@@ -2,30 +2,10 @@ var playfield = require('./playfield.js');
 
 PLAYER_COUNT = 2;
 
-function serialize_field(playfield) {
-    var cells = Array(playfield.cells.length);
-    for(var i=0;i<cells.length;++i) {
-        var cell = 0;
-        var x = i % playfield.width;
-        var y = Math.floor(i / playfield.width);
-        if(playfield.cells[i]) {
-            cell = playfield.cells[i];
-        } else if(playfield.shape_at(x, y)) {
-            cell = playfield.shape_at(x, y);
-        }
-        cells[i] = cell;
-    }
-    return {
-        "cells": cells,
-        "width": playfield.width,
-        "height": playfield.height
-    };
-}
-
 function serialize_fields(game) {
-    fields = [];
-    for(var playfield in game.playfields) {
-        fields.push(serialize_field(game.playfields[playfield]));
+    fields = {};
+    for(var idx in game.playfields) {
+        fields[idx] = game.playfields[idx].serialize();
     }
     return fields;
 }
@@ -83,7 +63,7 @@ Game.prototype.add_player = function(socket) {
 }
 
 Game.prototype.remove_player = function(socket) {
-    var idx = socketidx;
+    var idx = socket.idx;
     this.sockets.splice(idx, idx);
     this.playfields.splice(idx, idx);
     --this.player_count;
@@ -98,21 +78,21 @@ Game.prototype.move_left = function(socket) {
     var idx = socket.idx;
     var pf = this.playfields[idx];
     pf.move_shape_left();
-    socket.emit('playfield_update', serialize_fields(this));
+    //socket.emit('playfield_update', serialize_fields(this));
 }
 
 Game.prototype.move_right = function(socket) {
     var idx = socket.idx;
     var pf = this.playfields[idx];
     pf.move_shape_right();
-    socket.emit('playfield_update', serialize_fields(this));
+    //socket.emit('playfield_update', serialize_fields(this));
 }
 
 Game.prototype.move_down = function(socket) {
     var idx = socket.idx;
     var pf = this.playfields[idx];
     pf.move_shape_down();
-    socket.emit('playfield_update', serialize_fields(this));
+    //socket.emit('playfield_update', serialize_fields(this));
 }
 
 Game.prototype.free_fall = function(socket) {
@@ -126,7 +106,7 @@ Game.prototype.rotate = function(socket) {
     var idx = socket.idx;
     var pf = this.playfields[idx];
     pf.rotate_shape();
-    socket.emit('playfield_update', serialize_fields(this));
+    //socket.emit('playfield_update', serialize_fields(this));
 }
 
 exports.Game = Game;
