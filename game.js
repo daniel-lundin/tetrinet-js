@@ -67,7 +67,7 @@ Game.prototype.step = function(player_idx) {
 }
 
 Game.prototype.add_player = function(socket) {
-    socket.set('idx', this.player_count);
+    socket.idx = this.player_count;
     this.sockets.push(socket);
     this.playfields.push(new playfield.PlayField(10, 20));
     socket.emit('id_assigned', this.player_count);
@@ -83,13 +83,11 @@ Game.prototype.add_player = function(socket) {
 }
 
 Game.prototype.remove_player = function(socket) {
-    var g = this;
-    socket.get('idx', function(err, idx) {
-        g.sockets.splice(idx, idx);
-        g.playfields.splice(idx, idx);
-        --g.player_count;
-        console.log('player removed');
-    });
+    var idx = socketidx;
+    this.sockets.splice(idx, idx);
+    this.playfields.splice(idx, idx);
+    --this.player_count;
+    console.log('player removed');
 }
 
 Game.prototype.full = function() {
@@ -97,58 +95,38 @@ Game.prototype.full = function() {
 }
 
 Game.prototype.move_left = function(socket) {
-    var g = this;
-    socket.get('idx', function(err, idx) {
-        var pf = g.playfields[idx];
-        pf.move_shape_left();
-        socket.emit('playfield_update', serialize_fields(g));
-    });
+    var idx = socket.idx;
+    var pf = this.playfields[idx];
+    pf.move_shape_left();
+    socket.emit('playfield_update', serialize_fields(this));
 }
 
 Game.prototype.move_right = function(socket) {
-    var g = this;
-    socket.get('idx', function(err, idx) {
-        var pf = g.playfields[idx];
-        pf.move_shape_right();
-        socket.emit('playfield_update', serialize_fields(g));
-    });
+    var idx = socket.idx;
+    var pf = this.playfields[idx];
+    pf.move_shape_right();
+    socket.emit('playfield_update', serialize_fields(this));
 }
 
 Game.prototype.move_down = function(socket) {
-    var g = this;
-    socket.get('idx', function(err, idx) {
-        var pf = g.playfields[idx];
-        pf.move_shape_down();
-        socket.emit('playfield_update', serialize_fields(g));
-    });
+    var idx = socket.idx;
+    var pf = this.playfields[idx];
+    pf.move_shape_down();
+    socket.emit('playfield_update', serialize_fields(this));
 }
 
 Game.prototype.free_fall = function(socket) {
-    var g = this;
-    socket.get('idx', function(err, idx) {
-        var pf = g.playfields[idx];
-        pf.free_fall();
-        g.step(idx);
-    });
+    var idx = socket.idx;
+    var pf = this.playfields[idx];
+    pf.free_fall();
+    this.step(idx);
 }
 
 Game.prototype.rotate = function(socket) {
-    var g = this;
-    socket.get('idx', function(err, idx) {
-        var pf = g.playfields[idx];
-        pf.rotate_shape();
-        socket.emit('playfield_update', serialize_fields(g));
-    });
-}
-
-Game.prototype.increase_from_bottom = function(socket) {
-    var g = this;
-    socket.get('idx', function(err, idx) {
-        var pf = g.playfields[idx];
-        console.log('increasing');
-        pf.increase_from_bottom(1);
-        socket.emit('playfield_update', serialize_fields(g));
-    });
+    var idx = socket.idx;
+    var pf = this.playfields[idx];
+    pf.rotate_shape();
+    socket.emit('playfield_update', serialize_fields(this));
 }
 
 exports.Game = Game;
