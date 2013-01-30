@@ -1,6 +1,7 @@
 var fs = require('fs');
 var pf = require('./playfield');
 var g = require('./game.js');
+var names = require('./names.js');
 
 var app = require('http').createServer(handler);
 var io = require('socket.io').listen(app);
@@ -40,10 +41,13 @@ function handler(req, res) {
 }
 
 
-var game = new g.Game();
-var games = [];
 io.sockets.on('connection', function (socket) {
-    game.add_player(socket);
+    socket.name = names.shuffle_name();
+    console.log('registered player ' + socket.name);
+    socket.emit('registered', socket.name);
+    g.GameMgr.find_or_create_game(socket);
+
+    var game = g.GameMgr.game_for(socket);
     socket.on('message', function (data) {
         switch(data) {
             case 'left':
@@ -57,6 +61,9 @@ io.sockets.on('connection', function (socket) {
                 break;
             case 'down':
                 game.move_down(socket);
+                break;
+            case 'start_game':
+                game.start_game(socket);
                 break;
             case 'free_fall':
                 game.free_fall(socket);

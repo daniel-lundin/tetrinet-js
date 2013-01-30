@@ -1,6 +1,9 @@
 var playfield = require('./playfield.js');
 
-PLAYER_COUNT = 2;
+
+GAME_WAITING = 0;
+GAME_RUNNING = 1;
+GAME_OVER = 2;
 
 function serialize_fields(game) {
     fields = {};
@@ -20,6 +23,8 @@ function tick(game) {
     }
     if(num_alive == 1) {
         console.log('---game over---');
+        game.state = GAME_OVER;
+        game.broadcast('game_over', undefined);
         clearInterval(game.clock);
     }
 }
@@ -27,10 +32,16 @@ function tick(game) {
 function Game() {
     this.sockets = [];
     this.playfields = [];
-    this.started = false;
+    this.state = GAME_WAITING;
     this.player_count = 0;
+    this.id = Math.floor(Math.random()*9999999);
 }
 
+Game.prototype.broadcast = function(identifier, data) {
+    for(var idx in this.sockets) {
+        this.sockets[idx].emit(identifier, data);
+    }
+}
 Game.prototype.step = function(player_idx) {
     var pf = this.playfields[player_idx];
     var lines_reduced = pf.step();
@@ -48,17 +59,20 @@ Game.prototype.step = function(player_idx) {
 
 Game.prototype.add_player = function(socket) {
     socket.idx = this.player_count;
+    socket.game_id = this.id;
     this.sockets.push(socket);
     this.playfields.push(new playfield.PlayField(10, 20));
     socket.emit('id_assigned', this.player_count);
     ++this.player_count;
     console.log('player added');
-    if(this.full()) {
-        console.log("game started");
-        this.started = true;
-        var g = this;
-        console.log("starting timer");
-        this.clock = setInterval(function() { tick(g); }, 1000);
+}
+
+Game.prototype.start_game = function(socket) {
+    if(this.state == GAME_WAITING && this.sockets.length > 1) {
+        console.log('Starting game with ' + this.sockets.length + ' players...');
+        this.state = GAME_RUNNING;
+        var game = this;
+        this.clock = setInterval(function() { tick(game); }, 1000);
     }
 }
 
@@ -68,10 +82,7 @@ Game.prototype.remove_player = function(socket) {
     this.playfields.splice(idx, idx);
     --this.player_count;
     console.log('player removed');
-}
-
-Game.prototype.full = function() {
-    return this.player_count >= PLAYER_COUNT;
+    this.emit_player_name_update();
 }
 
 Game.prototype.move_left = function(socket) {
@@ -109,4 +120,43 @@ Game.prototype.rotate = function(socket) {
     //socket.emit('playfield_update', serialize_fields(this));
 }
 
+Game.prototype.emit_player_name_update = function() {
+    list_of_names = this.sockets.map(function(s) {
+        return s.name;
+    });
+    this.broadcast('game_update', list_of_names);
+}
+
+//----------------------
+//---- GAME MANAGER ----
+//----------------------
+GAMES = [];
+GameMgr = {};
+
+// Joins a not yet started game or creates a new game if nothing found
+GameMgr.find_or_create_game = function(socket) {
+    for(var g in GAMES) {
+        if(GAMES[g].state == GAME_WAITING) {
+            console.log('joining existing game');
+            GAMES[g].add_player(socket);
+            socket.emit('game_joined');
+            GAMES[g].emit_player_name_update();
+            return;
+        }
+    }
+    console.log('creating brand new game');
+    var game = new Game();
+    GAMES.push(game);
+    game.add_player(socket);
+    socket.emit('game_created');
+    socket.emit('game_update', [socket.name]);
+}
+
+GameMgr.game_for = function(socket) {
+    for(var g in GAMES)
+        if(socket.game_id == GAMES[g].id)
+            return GAMES[g];
+    return undefined;
+}
 exports.Game = Game;
+exports.GameMgr = GameMgr;

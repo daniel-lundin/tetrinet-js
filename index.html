@@ -21,9 +21,32 @@
       draw_fields(canvas, data);
     });
 
-    socket.on('id_assigned', function(data) {
+    socket.on('registered', function(data) {
       console.log("I'm player " + data);
+      PLAYER_ID = data['id'];
+    });
+    socket.on('id_assigned', function(data) {
+      console.log("Id assigned " + data);
       PLAYER_ID = data;
+    });
+    socket.on('game_joined', function(data) {
+        console.log('game joined');
+    });
+    socket.on('game_created', function(data) {
+        console.log('game created');
+    });
+    socket.on('game_update', function(data) {
+        var list = document.getElementById('player-list');
+        list.textContent = '';
+        for(var p in data) {
+            var item = document.createElement('li');
+            item.textContent = data[p];
+            list.appendChild(item);
+        }
+        console.log(data);
+    });
+    socket.on('game_over', function(data) {
+        console.log('GAME OVER');
     });
 
     document.onkeydown = function(e) {
@@ -47,6 +70,9 @@
         case 32:
           PLAY_FIELD.free_fall();
           socket.send('free_fall');
+          break;
+        case 83:
+          socket.send('start_game');
           break;
         default:
           console.log(e.keyCode)
@@ -74,6 +100,12 @@
     </script>
   </head>
   <body>
-    <canvas id="canvas" width="600" height="600"></canvas>
+    <h1>Tetrinet</h1>
+    <canvas id="canvas" width="600" height="500" style="float: left"></canvas>
+    <div style="float:left">
+      <p>Press 's' to start game(two players needed)</p>
+      <h2>Players</h2>
+      <ul id="player-list"></ul>
+    </div>
   </body>
 </html>

@@ -36,7 +36,7 @@ function draw_field(canvas, play_field, field_width, field_height, offset_x, off
 }
 
 function draw_main_field(canvas, play_field) {
-    draw_field(canvas, play_field, 300, 500, 10, 10);
+    draw_field(canvas, play_field, 300, 480, 10, 10);
 }
 
 
