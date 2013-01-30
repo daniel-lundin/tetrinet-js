@@ -6,7 +6,6 @@ var names = require('./names.js');
 var app = require('http').createServer(handler);
 var io = require('socket.io').listen(app);
 io.set('log level', 1)
-
 app.listen(process.env.PORT || 8080);
 
 static_url_map = {
