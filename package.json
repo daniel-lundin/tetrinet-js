@@ -1,9 +1,12 @@
 {
   "name": "tetrinet-js",
   "version": "0.0.1",
+  "scripts": {
+    "start": "cp shapes.js ./static/js/shapes.js && cp playfield.js ./static/js/playfield.js && node app.js"
+  },
   "dependencies": {
-    "express": "2.5.x",
-    "socket.io": "0.9.9"
+    "express": "^4.17.1",
+    "socket.io": "^4.4.0"
   },
   "engines": {
     "node": "0.8.x",
